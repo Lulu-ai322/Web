@@ -1,0 +1,30 @@
+body {
+  background: #0f172a;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  padding-top: 50px;
+}
+
+button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+  margin: 10px;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #2563eb;
+}
+
+.card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  margin: auto;
+}
