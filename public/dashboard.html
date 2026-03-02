@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="style.css">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="card">
-<h2>Dashboard</h2>
-<p>Your Discord ID:</p>
-<input id="userId" placeholder="Enter Discord ID">
+<div class="container">
+  <h2>📊 Earn Coins</h2>
 
-<br><br>
-<button onclick="goAds()">Earn Coins</button>
-<button onclick="goGen()">Generate</button>
+  <div class="ad-box">
+    <p>📢 Advertisement Banner</p>
+    <div class="fake-ad">Your Ad Here</div>
+  </div>
+
+  <button class="btn" onclick="earn()">Watch & Claim 2 Coins</button>
+
+  <p id="msg"></p>
 </div>
 
 <script>
-function goAds(){
-  window.location = "ads.html";
-}
-function goGen(){
-  window.location = "generate.html";
+function earn() {
+  fetch("/api/earn", {
+    method: "POST"
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      document.getElementById("msg").innerText = "✅ 2 Coins Added!";
+    } else {
+      document.getElementById("msg").innerText = "❌ Login required.";
+    }
+  })
 }
 </script>
 
