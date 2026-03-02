@@ -1,42 +1,61 @@
 require("dotenv").config();
 const express = require("express");
-const fetch = require("node-fetch");
-const app = express();
+const session = require("express-session");
+const axios = require("axios");
+const fs = require("fs");
 
+const app = express();
 app.use(express.json());
 app.use(express.static("public"));
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
 
-const BOT_API = process.env.BOT_API;
-const API_KEY = process.env.API_KEY;
+const FILE = process.env.DATA_FILE;
+const load = () => JSON.parse(fs.readFileSync(FILE));
+const save = (d) => fs.writeFileSync(FILE, JSON.stringify(d, null, 2));
 
-// Earn coins
-app.post("/earn", async (req, res) => {
-  const { userId } = req.body;
-
-  const response = await fetch(`${BOT_API}/earn`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, apiKey: API_KEY })
-  });
-
-  const data = await response.json();
-  res.json(data);
+app.get("/login",(req,res)=>{
+  const url=`https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}&response_type=code&scope=identify`;
+  res.redirect(url);
 });
 
-// Generate item
-app.post("/generate", async (req, res) => {
-  const { userId, item } = req.body;
+app.get("/callback", async (req,res)=>{
+  const code=req.query.code;
 
-  const response = await fetch(`${BOT_API}/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, item, apiKey: API_KEY })
-  });
+  const token=await axios.post("https://discord.com/api/oauth2/token",
+    new URLSearchParams({
+      client_id:process.env.CLIENT_ID,
+      client_secret:process.env.CLIENT_SECRET,
+      grant_type:"authorization_code",
+      code,
+      redirect_uri:process.env.REDIRECT_URI
+    }),
+    { headers:{'Content-Type':'application/x-www-form-urlencoded'} }
+  );
 
-  const data = await response.json();
-  res.json(data);
+  const user=await axios.get("https://discord.com/api/users/@me",
+    { headers:{Authorization:`Bearer ${token.data.access_token}`} }
+  );
+
+  req.session.user=user.data;
+  res.redirect("/dashboard.html");
 });
 
-app.listen(process.env.PORT, () => {
-  console.log("Website running");
+app.post("/api/earn",(req,res)=>{
+  if(!req.session.user) return res.status(401).json({error:"Login required"});
+
+  const data=load();
+  const uid=req.session.user.id;
+
+  if(!data.coins[uid]) data.coins[uid]=parseInt(process.env.START_COINS);
+
+  data.coins[uid]+=2;
+  save(data);
+
+  res.json({success:true});
 });
+
+app.listen(process.env.PORT,()=>console.log("🌐 Web Running"));
