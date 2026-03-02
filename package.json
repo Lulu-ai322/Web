@@ -1,11 +1,15 @@
 {
-  "name": "gen-web",
+  "name": "cola-gen-plus",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "bot.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node bot.js & node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "discord.js": "^14.14.1",
+    "express": "^4.18.2",
+    "dotenv": "^16.4.5",
+    "axios": "^1.6.7",
+    "express-session": "^1.17.3"
   }
 }
