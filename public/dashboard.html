@@ -6,34 +6,56 @@
 </head>
 <body>
 
-<div class="container">
-  <h2>📊 Earn Coins</h2>
+<div class="bg"></div>
 
-  <div class="ad-box">
-    <p>📢 Advertisement Banner</p>
-    <div class="fake-ad">Your Ad Here</div>
+<div class="topbar">
+  <div class="left">
+    <img id="avatar" class="avatar">
+    <span id="username"></span>
   </div>
+  <div class="right">
+    🪙 <span id="coins">0</span>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
 
-  <button class="btn" onclick="earn()">Watch & Claim 2 Coins</button>
-
+<div class="main">
+  <h2>📢 Advertisement</h2>
+  <div class="ad">Your Ad Banner Here</div>
+  <button onclick="earn()" class="btn">Claim 2 Coins</button>
   <p id="msg"></p>
 </div>
 
 <script>
-function earn() {
-  fetch("/api/earn", {
-    method: "POST"
-  })
-  .then(res => res.json())
-  .then(data => {
-    if(data.success){
-      document.getElementById("msg").innerText = "✅ 2 Coins Added!";
-    } else {
-      document.getElementById("msg").innerText = "❌ Login required.";
-    }
-  })
+function loadUser(){
+  fetch("/api/user")
+  .then(res=>res.json())
+  .then(data=>{
+    if(!data.logged) return window.location="/";
+
+    document.getElementById("username").innerText = data.username;
+    document.getElementById("coins").innerText = data.coins;
+    document.getElementById("avatar").src = data.avatar;
+  });
 }
+
+function earn(){
+  fetch("/api/earn",{method:"POST"})
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.success){
+      document.getElementById("msg").innerText="✅ 2 Coins Added!";
+      loadUser();
+    } else {
+      document.getElementById("msg").innerText="⏳ Wait 1 minute.";
+    }
+  });
+}
+
+loadUser();
 </script>
 
+</body>
+</html>
 </body>
 </html>
